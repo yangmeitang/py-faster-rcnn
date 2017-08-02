@@ -1,1 +1,8 @@
+*.pyc
+*.swp
+*.bak
+*.so
+*~
 training
+data
+models/imagenet

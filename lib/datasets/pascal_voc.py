@@ -26,6 +26,7 @@ class pascal_voc(imdb):
         self._image_set = image_set
         self._devkit_path = self._get_default_path() if devkit_path is None \
                             else devkit_path
+        print 'devpath:', self._devkit_path
         self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
         self._classes = ('__background__', # always index 0
                          'aeroplane', 'bicycle', 'bird', 'boat',
@@ -88,7 +89,8 @@ class pascal_voc(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return os.path.join(cfg.DATA_DIR, 'VOCdevkit' + self._year)
+        #return os.path.join(cfg.DATA_DIR, 'VOC/VOCdevkit' + self._year)
+        return os.path.join(cfg.DATA_DIR, 'VOC/VOCdevkit')
 
     def gt_roidb(self):
         """

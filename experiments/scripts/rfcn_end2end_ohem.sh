@@ -54,7 +54,7 @@ time ./tools/train_net_multi_gpu.py --gpu 0,1 \
   --weights data/imagenet_models/${NET}-model.caffemodel \
   --imdb ${TRAIN_IMDB} \
   --iters ${ITERS} \
-  --cfg experiments/cfgs/rfcn_end2end_ohem_${PT_DIR}.yml \
+  --cfg experiments/cfgs/rfcn_end2end_ohem.yml \
   ${EXTRA_ARGS}
 
 
@@ -66,5 +66,5 @@ time ./tools/test_net.py --gpu ${GPU_ID} \
   --def models/${PT_DIR}/${NET}/rfcn_end2end/test_agnostic.prototxt \
   --net ${NET_FINAL} \
   --imdb ${TEST_IMDB} \
-  --cfg experiments/cfgs/rfcn_end2end_ohem_${PT_DIR}.yml \
+  --cfg experiments/cfgs/rfcn_end2end_ohem.yml \
   ${EXTRA_ARGS}
