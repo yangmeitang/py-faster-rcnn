@@ -3,6 +3,7 @@
 *.bak
 *.so
 *~
+output
 training
 data
 models/imagenet

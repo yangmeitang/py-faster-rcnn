@@ -60,10 +60,14 @@ def combined_roidb(imdb_names):
         print 'Loaded dataset `{:s}` for training'.format(imdb.name)
         imdb.set_proposal_method(cfg.TRAIN.PROPOSAL_METHOD)
         print 'Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD)
+        print 'before get_training_roidb wwwwwwwwwwwwwwwwwwwwwwwwwwwwww'
         roidb = get_training_roidb(imdb)
+        print 'after get trianing roidb wwwwwwwwwwwwwwwwwwwwww'
         return roidb
 
+    print 'before getroidb()xxxxxxxxxxxxxxxxxxxxxxx'
     roidbs = [get_roidb(s) for s in imdb_names.split('+')]
+    print 'after getroidb()xxxxxxxxxxxxxxxxxxxxxxx'
     roidb = roidbs[0]
     if len(roidbs) > 1:
         for r in roidbs[1:]:

@@ -48,10 +48,9 @@ LOG="experiments/logs/rfcn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 
-
 time ./tools/train_net_multi_gpu.py --gpu 0,1 \
   --solver models/${PT_DIR}/${NET}/rfcn_end2end/solver_ohem.prototxt \
-  --weights data/imagenet_models/${NET}-model.caffemodel \
+  --weights models/imagenet/${NET}-model.caffemodel \
   --imdb ${TRAIN_IMDB} \
   --iters ${ITERS} \
   --cfg experiments/cfgs/rfcn_end2end_ohem_${PT_DIR}.yml \
