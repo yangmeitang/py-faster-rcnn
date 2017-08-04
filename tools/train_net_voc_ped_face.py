@@ -2,9 +2,9 @@
 
 # --------------------------------------------------------
 # Fast R-CNN
-# Copyright (c) 2015 Microsoft
+# Copyright (c) 2016 Institute for Infocomm Research
 # Licensed under The MIT License [see LICENSE for details]
-# Written by Ross Girshick
+# Written by Zhou Lubing
 # --------------------------------------------------------
 
 """Train a Fast R-CNN network on a region of interest database."""
@@ -12,13 +12,44 @@
 import _init_paths
 from fast_rcnn.train import get_training_roidb, train_net
 from fast_rcnn.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
-from datasets.factory import get_imdb
-import datasets.imdb
+
+from datasets.voc_ped import voc_ped
 import caffe
 import argparse
 import pprint
 import numpy as np
 import sys
+
+import matplotlib
+import matplotlib.pyplot as plt
+#from scipy.misc import imread, imresize
+import cv2
+
+def vis_result(im, boxes):
+    """Draw detected bounding boxes."""
+    im = im[:, :, (2, 1, 0)]
+    fig, ax = plt.subplots(figsize=(12, 12))
+
+    for i in xrange(boxes.shape[0]):
+        box = boxes[i, :]
+        x = int(box[0])
+        y = int(box[1])
+        w = int(box[2]) - int(box[0])
+        h = int(box[3]) - int(box[1])
+        ax.add_patch(
+            plt.Rectangle((x, y),
+                          w,
+                          h, fill=False,
+                          edgecolor='red', linewidth=3.5)
+            )
+
+    ax.set_title(('{} detections with '
+                  'p({} | box) >= {:.1f}').format('class', 'class',
+                                                  0.5),
+                  fontsize=14)
+    ax.imshow(im, aspect='equal')
+    plt.draw()
+    plt.show()
 
 def parse_args():
     """
@@ -42,7 +73,7 @@ def parse_args():
                         default=None, type=str)
     parser.add_argument('--imdb', dest='imdb_name',
                         help='dataset to train on',
-                        default='voc_2007_trainval', type=str)
+                        default='voc_ped', type=str)
     parser.add_argument('--rand', dest='randomize',
                         help='randomize (do not use a fixed seed)',
                         action='store_true')
@@ -57,42 +88,19 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def combined_roidb(imdb_names):
-    def get_roidb(imdb_name):
-        imdb = get_imdb(imdb_name)
-        print 'Loaded dataset `{:s}` for training'.format(imdb.name)
-        imdb.set_proposal_method(cfg.TRAIN.PROPOSAL_METHOD)
-        print 'Set proposal method: {:s}'.format(cfg.TRAIN.PROPOSAL_METHOD)
-        roidb = get_training_roidb(imdb)
-        return roidb
-
-    # get_roidb(): Get the ROIs of database as a list: roidb[i].{boxes,
-    # gt_overlaps, gt_classes, flipped, seg_areas, image, width, height,
-    # max_classes, max_overlaps}
-    roidbs = [get_roidb(s) for s in imdb_names.split('+')]
-    roidb = roidbs[0]
-
-    # get_imdb(): Get image database information: {_name, _num_classes,
-    # _classes,  _image_index, config, _roidb_handler...,}.
-    if len(roidbs) > 1:
-        for r in roidbs[1:]:
-            roidb.extend(r)
-        imdb = datasets.imdb.imdb(imdb_names)
-    else:
-        imdb = get_imdb(imdb_names)
-    return imdb, roidb
 
 if __name__ == '__main__':
     args = parse_args()
 
     print('Called with args:')
-    print(args)
+    #print(args)
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+    #    print 'cfgfile: ', args.cfg_file
     if args.set_cfgs is not None:
         cfg_from_list(args.set_cfgs)
-
+    
     cfg.GPU_ID = args.gpu_id
 
     print('Using config:')
@@ -107,9 +115,13 @@ if __name__ == '__main__':
     caffe.set_mode_gpu()
     caffe.set_device(args.gpu_id)
 
-    imdb, roidb = combined_roidb(args.imdb_name)
+    #ihdb = voc_ped('voc_ped', '/home/mrbing/dataset/VOC')
+    ihdb = voc_ped('merged_voc_ped_face', '/home/mrbing/dataset/VOC')
+    roidb = ihdb.load_roidb()
+    ihdb.append_flipped_images_voc_ped(roidb)
+    print '{:d} roidb entries'.format(len(roidb))
 
-    #n = 130;
+    #n = 17000
     #print 'roidb samples:'
     #print 'roidb keys:'
     #print type(roidb)
@@ -132,9 +144,22 @@ if __name__ == '__main__':
     #print 'max_overlaps: ', roidb[n]['max_overlaps'].shape
     #print roidb[n]['max_overlaps']
     
-    print '{:d} roidb entries'.format(len(roidb))
+    #im = cv2.imread(roidb[n]['image'])
+    #boxes = roidb[n]['boxes']
+    ##print 'image: ', roidb[n]['image']
+    ##print 'flipped: ', roidb[n]['flipped']
+    ##print 'nums: ', boxes.shape
+    ##print 'classes: ', roidb[n]['gt_classes']
+    #if roidb[n]['flipped']:
+    #    im = cv2.flip(im, 1)
+    #vis_result(im, boxes)
 
-    output_dir = get_output_dir(imdb)
+
+    #output_dir = 'output/zf_faster_rcnn_e2e_voc_ped'
+    #output_dir = 'output/zf_faster_rcnn_e2e_voc_ped_face'
+    #output_dir = 'output/zf_faster_rcnn_e2e_voc_ped_face_4cls'
+    output_dir = 'output/zf_faster_rcnn_e2e_voc_ped_face_3cls'
+
     print 'Output will be saved to `{:s}`'.format(output_dir)
 
     train_net(args.solver, roidb, output_dir,

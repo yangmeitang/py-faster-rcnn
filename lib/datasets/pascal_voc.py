@@ -88,7 +88,6 @@ class pascal_voc(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        #return os.path.join(cfg.DATA_DIR, 'VOC/VOCdevkit' + self._year)
         return os.path.join(cfg.DATA_DIR, 'VOC/VOCdevkit')
 
     def gt_roidb(self):
